@@ -1,0 +1,73 @@
+EXAMEN II A.Y.E.D
+
+from collections import deque
+
+
+cola_espera = deque()
+
+
+historial_recetas = {
+    "Jose Duran": ["Paracetamol 500mg", "Ibuprofeno 400mg"],
+    "Luis García": ["Amoxicilina 500mg"],
+    "María López": []
+}
+
+
+def mostrar_menu():
+    print("\n--- Centro de Salud ---")
+    print("1. Ver quién está en espera")
+    print("2. Atender al siguiente paciente")
+    print("3. Consultar historial de recetas de un paciente")
+    print("4. Salir")
+
+def sistema_salud():
+  
+    cola_espera.extend(["Jose Duran", "Luis García", "María López"])
+
+    while True:
+        mostrar_menu()
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            if cola_espera:
+                print("\nPacientes en espera:")
+                for paciente in cola_espera:
+                    print(f"- {paciente}")
+            else:
+                print("No hay pacientes en espera.")
+
+        elif opcion == "2":
+            if cola_espera:
+                paciente_atendido = cola_espera.popleft()
+                print(f"\nAtendiendo a: {paciente_atendido}")
+                receta = input("Ingrese receta (o presione Enter si no hay receta): ")
+                if receta:
+                    historial_recetas.setdefault(paciente_atendido, []).append(receta)
+                    print("Receta añadida al historial.")
+                else:
+                    print("Sin receta registrada.")
+            else:
+                print("No hay pacientes en espera.")
+
+        elif opcion == "3":
+            nombre = input("Ingrese el nombre del paciente: ")
+            recetas = historial_recetas.get(nombre)
+            if recetas is not None:
+                print(f"\nHistorial de recetas de {nombre}:")
+                if recetas:
+                    for r in recetas:
+                        print(f"- {r}")
+                else:
+                    print("No hay recetas registradas.")
+            else:
+                print("Paciente no encontrado.")
+
+        elif opcion == "4":
+            print("Saliendo del sistema.")
+            break
+
+        else:
+            print("Opción no válida. Intente de nuevo.")
+
+if __name__ == "__main__":
+    sistema_salud()
