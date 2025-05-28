@@ -1,0 +1,100 @@
+from collections import deque
+from datetime import datetime
+import sys
+
+class Paciente:
+    def __init__(self, nombre, motivo):
+        self.nombre = nombre
+        self.motivo = motivo
+        self.historial_recetas = []  # pila para recetas
+
+    def agregar_receta(self, medicamentos, recomendaciones=""):
+        receta = {
+            "fecha": datetime.now().strftime("%d-%m-%Y %H:%M"),
+            "medicamentos": medicamentos,
+            "recomendaciones": recomendaciones
+        }
+        self.historial_recetas.append(receta)
+        return receta
+
+    def mostrar_historial(self):
+        # Devolve recettes più recenti prime
+        return list(reversed(self.historial_recetas))
+
+class CentroSalud:
+    def __init__(self):
+        self.cola_espera = deque()
+        self.pacientes_atendidos = []
+
+    def registrar_paciente(self):
+        nombre = input("Nombre del paciente: ").strip()
+        if not nombre:
+            print("Nombre no puede estar vacío.")
+            return
+        motivo = input("Motivo de consulta: ").strip()
+        if not motivo:
+            print("Motivo no puede estar vacío.")
+            return
+        paciente = Paciente(nombre, motivo)
+        self.cola_espera.append(paciente)
+        print(f"Paciente '{nombre}' registrado en la cola.")
+
+    def atender_paciente(self):
+        if not self.cola_espera:
+            print("No hay pacientes en espera.")
+            return
+        paciente = self.cola_espera.popleft()
+        print(f"Atendiendo a {paciente.nombre} (Motivo: {paciente.motivo})")
+        meds = input("Medicamentos (separados por coma): ").split(',')
+        medicamentos = [m.strip() for m in meds if m.strip()]
+        recomendaciones = input("Recomendaciones (opcional): ").strip()
+        receta = paciente.agregar_receta(medicamentos, recomendaciones)
+        print("Receta registrada:")
+        print(f"  Fecha: {receta['fecha']}")
+        print(f"  Medicamentos: {', '.join(receta['medicamentos'])}")
+        if receta['recomendaciones']:
+            print(f"  Recomendaciones: {receta['recomendaciones']}")
+        self.pacientes_atendidos.append(paciente)
+
+    def consultar_historial(self):
+        nombre = input("Nombre del paciente a consultar: ").strip()
+        encontrados = [p for p in self.pacientes_atendidos if p.nombre.lower() == nombre.lower()]
+        if not encontrados:
+            print(f"Paciente '{nombre}' no encontrado en atención previa.")
+            return
+        paciente = encontrados[0]
+        historial = paciente.mostrar_historial()
+        if not historial:
+            print(f"{paciente.nombre} no tiene recetas registradas.")
+            return
+        print(f"Historial de recetas de {paciente.nombre}:")
+        for idx, receta in enumerate(historial, 1):
+            print(f" {idx}. {receta['fecha']} - {', '.join(receta['medicamentos'])}"
+                  + (f" (Recomendaciones: {receta['recomendaciones']})" if receta['recomendaciones'] else ""))
+
+    def mostrar_menu(self):
+        print("\n=== Centro de Salud ===")
+        print("1. Registrar llegada de paciente")
+        print("2. Atender siguiente paciente")
+        print("3. Consultar historial de recetas")
+        print("4. Salir")
+
+    def ejecutar(self):
+        while True:
+            self.mostrar_menu()
+            opcion = input("Seleccione una opción [1-4]: ").strip()
+            if opcion == '1':
+                self.registrar_paciente()
+            elif opcion == '2':
+                self.atender_paciente()
+            elif opcion == '3':
+                self.consultar_historial()
+            elif opcion == '4':
+                print("Cerrando Centro de Salud. ¡Hasta luego!")
+                sys.exit(0)
+            else:
+                print("Opción inválida. Intente nuevamente.")
+
+if __name__ == '__main__':
+    centro = CentroSalud()
+    centro.ejecutar()
